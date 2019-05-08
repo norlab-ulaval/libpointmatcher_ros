@@ -1,2 +1,2 @@
 # libpointmatcher_ros
-A bridge node between libpointmatcher and ROS
+A bridge between libpointmatcher and ROS
