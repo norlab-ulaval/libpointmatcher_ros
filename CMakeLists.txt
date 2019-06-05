@@ -101,9 +101,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES libpointmatcher_ros
-#  CATKIN_DEPENDS roscpp
+ INCLUDE_DIRS include
+ LIBRARIES pointmatcher_ros
+ CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
@@ -115,6 +115,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 ## Declare a C++ library
