@@ -9,6 +9,7 @@ project(libpointmatcher_ros)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  sensor_msgs
 )
 
 find_package(libpointmatcher CONFIG)
@@ -105,7 +106,7 @@ find_package(libpointmatcher CONFIG)
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES pointmatcher_ros
- CATKIN_DEPENDS roscpp
+ CATKIN_DEPENDS roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
