@@ -1,1 +1,4 @@
-// Declare functions here
+namespace PointMatcher_ROS
+{
+
+}
