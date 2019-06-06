@@ -1,20 +1,5 @@
 #include "pointmatcher_ros/PointMatcher_ROS.h"
-
-bool ends_with(std::string value, std::string ending)
-{
-	size_t endingPos = value.rfind(ending);
-	return  endingPos != -1 && endingPos == (value.length() - ending.length());
-}
-
-void erase_last(std::string& base, std::string token)
-{
-	size_t tokenPos = base.rfind(token);
-
-	if(tokenPos != -1)
-	{
-		base.erase(tokenPos, token.length());
-	}
-}
+#include "utils.h"
 
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::PointCloud2& rosMsg)
