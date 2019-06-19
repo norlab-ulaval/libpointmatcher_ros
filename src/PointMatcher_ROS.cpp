@@ -1,5 +1,7 @@
 #include "pointmatcher_ros/PointMatcher_ROS.h"
 #include "utils.h"
+#include <tf2_eigen/tf2_eigen.h>
+#include <geometry_msgs/TransformStamped.h>
 
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::PointCloud2& rosMsg)
@@ -545,3 +547,67 @@ template
 sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg<float>(const PointMatcher<float>::DataPoints& pmCloud, const std::string& frame_id, const ros::Time& stamp);
 template
 sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg<double>(const PointMatcher<double>::DataPoints& pmCloud, const std::string& frame_id, const ros::Time& stamp);
+
+template<typename T>
+nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id, const ros::Time& stamp)
+{
+	nav_msgs::Odometry odom;
+	odom.header.stamp = stamp;
+	odom.header.frame_id = frame_id;
+
+	// Fill pose
+	const Eigen::Affine3d eigenTr(
+			Eigen::Matrix4d(
+					matrixToDim<double>(
+							inTr.template cast<double>(), 4
+					)
+			)
+	);
+	odom.pose.pose = tf2::toMsg(eigenTr);
+
+	// Fill velocity
+	odom.twist.covariance[0+0*6] = -1;
+	odom.twist.covariance[1+1*6] = -1;
+	odom.twist.covariance[2+2*6] = -1;
+	odom.twist.covariance[3+3*6] = -1;
+	odom.twist.covariance[4+4*6] = -1;
+	odom.twist.covariance[5+5*6] = -1;
+
+	return odom;
+}
+
+template
+nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg<float>(const PointMatcher<float>::TransformationParameters& inTr, const std::string& frame_id, const ros::Time& stamp);
+template
+nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg<double>(const PointMatcher<double>::TransformationParameters& inTr, const std::string& frame_id, const ros::Time& stamp);
+
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher_ROS::rosTfToPointMatcherTransformation(const geometry_msgs::TransformStamped& transformStamped)
+{
+	Eigen::Affine3d eigenTr = tf2::transformToEigen(transformStamped);
+	return eigenTr.matrix().cast<T>();
+}
+
+template
+PointMatcher<float>::TransformationParameters PointMatcher_ROS::rosTfToPointMatcherTransformation<float>(const geometry_msgs::TransformStamped& transformStamped);
+template
+PointMatcher<double>::TransformationParameters PointMatcher_ROS::rosTfToPointMatcherTransformation<double>(const geometry_msgs::TransformStamped& transformStamped);
+
+template<typename T>
+geometry_msgs::TransformStamped PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr)
+{
+	const Eigen::Affine3d eigenTr(
+			Eigen::Matrix4d(
+					matrixToDim<double>(
+							inTr.template cast<double>(), 4
+					)
+			)
+	);
+	geometry_msgs::TransformStamped tfTr = tf2::eigenToTransform(eigenTr);
+	return tfTr;
+}
+
+template
+geometry_msgs::TransformStamped PointMatcher_ROS::pointMatcherTransformationToRosTf<float>(const PointMatcher<float>::TransformationParameters& inTr);
+template
+geometry_msgs::TransformStamped PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr);

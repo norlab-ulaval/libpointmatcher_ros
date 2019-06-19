@@ -10,6 +10,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
+  nav_msgs
 )
 
 find_package(libpointmatcher CONFIG)
@@ -106,7 +107,7 @@ find_package(libpointmatcher CONFIG)
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES pointmatcher_ros
- CATKIN_DEPENDS roscpp sensor_msgs
+ CATKIN_DEPENDS roscpp sensor_msgs nav_msgs
 #  DEPENDS system_lib
 )
 
