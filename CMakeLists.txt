@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   nav_msgs
-)
+  )
 
 find_package(libpointmatcher CONFIG)
 
@@ -105,10 +105,10 @@ find_package(libpointmatcher CONFIG)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
- LIBRARIES pointmatcher_ros
- CATKIN_DEPENDS roscpp sensor_msgs nav_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES pointmatcher_ros
+  CATKIN_DEPENDS roscpp sensor_msgs nav_msgs
+  #  DEPENDS system_lib
 )
 
 ###########
@@ -126,7 +126,7 @@ include_directories(
 ## Declare a C++ library
 add_library(pointmatcher_ros
   src/PointMatcher_ROS.cpp
-)
+  )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -152,7 +152,7 @@ add_library(pointmatcher_ros
 target_link_libraries(pointmatcher_ros
   ${catkin_LIBRARIES}
   ${libpointmatcher_LIBRARIES}
-)
+  )
 
 #############
 ## Install ##
