@@ -643,7 +643,7 @@ PointMatcher_ROS::rosTfToPointMatcherTransformation<double>(const geometry_msgs:
 
 template<typename T>
 geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr)
+PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id, const std::string& child_frame_id, const ros::Time& stamp)
 {
 	const Eigen::Affine3d eigenTr(
 			Eigen::Matrix4d(
@@ -653,13 +653,16 @@ PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<
 			)
 	);
 	geometry_msgs::TransformStamped tfTr = tf2::eigenToTransform(eigenTr);
+	tfTr.header.frame_id = frame_id;
+	tfTr.child_frame_id = child_frame_id;
+	tfTr.header.stamp = stamp;
 	return tfTr;
 }
 
 template
 geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf<float>(const PointMatcher<float>::TransformationParameters& inTr);
+PointMatcher_ROS::pointMatcherTransformationToRosTf<float>(const PointMatcher<float>::TransformationParameters& inTr, const std::string& frame_id, const std::string& child_frame_id, const ros::Time& stamp);
 
 template
 geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr);
+PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr, const std::string& frame_id, const std::string& child_frame_id, const ros::Time& stamp);
