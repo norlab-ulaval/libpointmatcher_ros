@@ -14,23 +14,18 @@ namespace PointMatcher_ROS
 	typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::LaserScan& rosMsg);
 	
 	template<typename T>
-	sensor_msgs::PointCloud2
-	pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id, const ros::Time& stamp);
+	sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,
+													   const ros::Time& stamp);
 	
 	template<typename T>
-	nav_msgs::Odometry
-	pointMatcherTransformationToOdomMsg(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id,
-										const ros::Time& stamp);
+	nav_msgs::Odometry pointMatcherTransformationToOdomMsg(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id,
+														   const ros::Time& stamp);
 	
 	template<typename T>
-	typename PointMatcher<T>::TransformationParameters
-	rosTfToPointMatcherTransformation(const geometry_msgs::TransformStamped& transformStamped);
+	typename PointMatcher<T>::TransformationParameters rosTfToPointMatcherTransformation(const geometry_msgs::TransformStamped& transformStamped,
+																						 const int& transformationDimension);
 	
 	template<typename T>
-	geometry_msgs::TransformStamped
-	pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id,
-									  const std::string& child_frame_id, const ros::Time& stamp);
-	
-	template<typename T>
-	typename PointMatcher<T>::TransformationParameters matrixToDim(const typename PointMatcher<T>::TransformationParameters& matrix, int dim);
+	geometry_msgs::TransformStamped pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr,
+																	  const std::string& frame_id, const std::string& child_frame_id, const ros::Time& stamp);
 }

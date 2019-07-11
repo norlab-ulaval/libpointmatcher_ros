@@ -336,9 +336,8 @@ template
 PointMatcher<double>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<double>(const sensor_msgs::LaserScan& rosMsg);
 
 template<typename T>
-sensor_msgs::PointCloud2
-PointMatcher_ROS::pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,
-											const ros::Time& stamp)
+sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,
+																	 const ros::Time& stamp)
 {
 	
 	sensor_msgs::PointCloud2 rosCloud;
@@ -580,14 +579,12 @@ PointMatcher_ROS::pointMatcherCloudToRosMsg(const typename PointMatcher<T>::Data
 }
 
 template
-sensor_msgs::PointCloud2
-PointMatcher_ROS::pointMatcherCloudToRosMsg<float>(const PointMatcher<float>::DataPoints& pmCloud, const std::string& frame_id,
-												   const ros::Time& stamp);
+sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg<float>(const PointMatcher<float>::DataPoints& pmCloud, const std::string& frame_id,
+																			const ros::Time& stamp);
 
 template
-sensor_msgs::PointCloud2
-PointMatcher_ROS::pointMatcherCloudToRosMsg<double>(const PointMatcher<double>::DataPoints& pmCloud, const std::string& frame_id,
-													const ros::Time& stamp);
+sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg<double>(const PointMatcher<double>::DataPoints& pmCloud, const std::string& frame_id,
+																			 const ros::Time& stamp);
 
 template<typename T>
 nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg(const typename PointMatcher<T>::TransformationParameters& inTr,
@@ -627,25 +624,25 @@ nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg<double>
 																				 const std::string& frame_id, const ros::Time& stamp);
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters
-PointMatcher_ROS::rosTfToPointMatcherTransformation(const geometry_msgs::TransformStamped& transformStamped)
+typename PointMatcher<T>::TransformationParameters PointMatcher_ROS::rosTfToPointMatcherTransformation(const geometry_msgs::TransformStamped& transformStamped,
+																									   const int& transformationDimension)
 {
 	Eigen::Affine3d eigenTr = tf2::transformToEigen(transformStamped);
-	return eigenTr.matrix().cast<T>();
+	return matrixToDim<T>(eigenTr.matrix().cast<T>(), transformationDimension);
 }
 
 template
 PointMatcher<float>::TransformationParameters
-PointMatcher_ROS::rosTfToPointMatcherTransformation<float>(const geometry_msgs::TransformStamped& transformStamped);
+PointMatcher_ROS::rosTfToPointMatcherTransformation<float>(const geometry_msgs::TransformStamped& transformStamped, const int& transformationDimension);
 
 template
 PointMatcher<double>::TransformationParameters
-PointMatcher_ROS::rosTfToPointMatcherTransformation<double>(const geometry_msgs::TransformStamped& transformStamped);
+PointMatcher_ROS::rosTfToPointMatcherTransformation<double>(const geometry_msgs::TransformStamped& transformStamped, const int& transformationDimension);
 
 template<typename T>
-geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id,
-													const std::string& child_frame_id, const ros::Time& stamp)
+geometry_msgs::TransformStamped PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr,
+																					const std::string& frame_id, const std::string& child_frame_id,
+																					const ros::Time& stamp)
 {
 	const Eigen::Affine3d eigenTr(
 			Eigen::Matrix4d(
@@ -662,36 +659,11 @@ PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<
 }
 
 template
-geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf<float>(const PointMatcher<float>::TransformationParameters& inTr, const std::string& frame_id,
-														   const std::string& child_frame_id, const ros::Time& stamp);
+geometry_msgs::TransformStamped PointMatcher_ROS::pointMatcherTransformationToRosTf<float>(const PointMatcher<float>::TransformationParameters& inTr,
+																						   const std::string& frame_id,
+																						   const std::string& child_frame_id, const ros::Time& stamp);
 
 template
-geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr, const std::string& frame_id,
-															const std::string& child_frame_id, const ros::Time& stamp);
-
-template<typename T>
-typename PointMatcher<T>::TransformationParameters PointMatcher_ROS::matrixToDim(const typename PointMatcher<T>::TransformationParameters& matrix, int dim)
-{
-	typedef typename PointMatcher<T>::TransformationParameters M;
-	assert(matrix.rows() == matrix.cols());
-	assert((matrix.rows() == 3) || (matrix.rows() == 4));
-	assert((dim == 3) || (dim == 4));
-	
-	if(matrix.rows() == dim)
-	{
-		return matrix;
-	}
-	
-	M out(M::Identity(dim, dim));
-	out.topLeftCorner(2, 2) = matrix.topLeftCorner(2, 2);
-	out.topRightCorner(2, 1) = matrix.topRightCorner(2, 1);
-	return out;
-}
-
-template
-PointMatcher<float>::TransformationParameters PointMatcher_ROS::matrixToDim<float>(const PointMatcher<float>::TransformationParameters& matrix, int dim);
-
-template
-PointMatcher<double>::TransformationParameters PointMatcher_ROS::matrixToDim<double>(const PointMatcher<double>::TransformationParameters& matrix, int dim);
+geometry_msgs::TransformStamped PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr,
+																							const std::string& frame_id,
+																							const std::string& child_frame_id, const ros::Time& stamp);
