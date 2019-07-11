@@ -311,8 +311,9 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 	{
 		const T angle = rosMsg.angle_min + ids[i] * rosMsg.angle_increment;
 		const T range(ranges[i]);
-		const T x = cos(angle) * range;
-		const T y = sin(angle) * range;
+		
+		cloud.features(0, i) = cos(angle) * range;
+		cloud.features(1, i) = sin(angle) * range;
 	}
 	
 	// fill descriptors
