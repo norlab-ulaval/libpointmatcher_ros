@@ -643,7 +643,8 @@ PointMatcher_ROS::rosTfToPointMatcherTransformation<double>(const geometry_msgs:
 
 template<typename T>
 geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id, const std::string& child_frame_id, const ros::Time& stamp)
+PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id,
+													const std::string& child_frame_id, const ros::Time& stamp)
 {
 	const Eigen::Affine3d eigenTr(
 			Eigen::Matrix4d(
@@ -661,8 +662,35 @@ PointMatcher_ROS::pointMatcherTransformationToRosTf(const typename PointMatcher<
 
 template
 geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf<float>(const PointMatcher<float>::TransformationParameters& inTr, const std::string& frame_id, const std::string& child_frame_id, const ros::Time& stamp);
+PointMatcher_ROS::pointMatcherTransformationToRosTf<float>(const PointMatcher<float>::TransformationParameters& inTr, const std::string& frame_id,
+														   const std::string& child_frame_id, const ros::Time& stamp);
 
 template
 geometry_msgs::TransformStamped
-PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr, const std::string& frame_id, const std::string& child_frame_id, const ros::Time& stamp);
+PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr, const std::string& frame_id,
+															const std::string& child_frame_id, const ros::Time& stamp);
+
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher_ROS::matrixToDim(const typename PointMatcher<T>::TransformationParameters& matrix, int dim)
+{
+	typedef typename PointMatcher<T>::TransformationParameters M;
+	assert(matrix.rows() == matrix.cols());
+	assert((matrix.rows() == 3) || (matrix.rows() == 4));
+	assert((dim == 3) || (dim == 4));
+	
+	if(matrix.rows() == dim)
+	{
+		return matrix;
+	}
+	
+	M out(M::Identity(dim, dim));
+	out.topLeftCorner(2, 2) = matrix.topLeftCorner(2, 2);
+	out.topRightCorner(2, 1) = matrix.topRightCorner(2, 1);
+	return out;
+}
+
+template
+PointMatcher<float>::TransformationParameters PointMatcher_ROS::matrixToDim<float>(const PointMatcher<float>::TransformationParameters& matrix, int dim);
+
+template
+PointMatcher<double>::TransformationParameters PointMatcher_ROS::matrixToDim<double>(const PointMatcher<double>::TransformationParameters& matrix, int dim);
