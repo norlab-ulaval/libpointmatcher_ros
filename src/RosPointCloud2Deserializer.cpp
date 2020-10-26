@@ -1,5 +1,5 @@
 
-#include "PointMatcher_ROS/RosPointCloud2Deserializer.h"
+#include "pointmatcher_ros/RosPointCloud2Deserializer.h"
 
 namespace PointMatcher_ROS
 {
