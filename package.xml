@@ -64,6 +64,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>libpointmatcher</exec_depend>
+
+  <test_depend>gtest</test_depend>
   
   
   <!-- The export tag contains other, unspecified, tags -->

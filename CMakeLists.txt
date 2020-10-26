@@ -7,11 +7,12 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  sensor_msgs
-  nav_msgs
-  )
+find_package(catkin REQUIRED
+  COMPONENTS
+    roscpp
+    sensor_msgs
+    nav_msgs
+)
 
 find_package(libpointmatcher CONFIG)
 
@@ -152,7 +153,7 @@ add_library(pointmatcher_ros
 target_link_libraries(pointmatcher_ros
   ${catkin_LIBRARIES}
   ${libpointmatcher_LIBRARIES}
-  )
+)
 
 #############
 ## Install ##
@@ -201,3 +202,22 @@ target_link_libraries(pointmatcher_ros
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+#############
+## Testing ##
+#############
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(test_${PROJECT_NAME}
+    test/RosPointCloud2DeserializerTest.cpp
+  )
+  target_include_directories(test_${PROJECT_NAME} PRIVATE
+    include
+  )
+  target_include_directories(test_${PROJECT_NAME} SYSTEM PUBLIC
+    ${catkin_INCLUDE_DIRS}
+  )
+  target_link_libraries(test_${PROJECT_NAME}
+    gtest_main
+    ${PROJECT_NAME}
+  )
+endif()
