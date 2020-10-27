@@ -27,8 +27,8 @@ class RosPointCloud2Deserializer
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    using PM = PointMatcher<T>;
-    using PMIO = PointMatcherIO<T>;
+    using PM = PointMatcher<ScalarType>;
+    using PMIO = PointMatcherIO<ScalarType>;
     using PM_types = typename PMIO::PMPropTypes;
     using DataPoints = typename PM::DataPoints;
     using Label = typename DataPoints::Label;
@@ -113,7 +113,7 @@ public:
                                        View& view)
     {
         // Use iterator to read data and write it into view.
-        sensor_msgs::PointCloud2ConstIterator<T> iter(rosMsg, fieldName);
+        sensor_msgs::PointCloud2ConstIterator<ScalarType> iter(rosMsg, fieldName);
         for (size_t i = 0; i < pointCount; ++i, ++iter)
         {
             view(0, i) = *iter;
@@ -133,13 +133,13 @@ public:
                                        const bool is3dPointCloud, const size_t pointCount, View& view)
     {
         // Create iterators to read data from the message buffer.
-        sensor_msgs::PointCloud2ConstIterator<T> iterX(rosMsg, fieldNames[0]);
-        sensor_msgs::PointCloud2ConstIterator<T> iterY(rosMsg, fieldNames[1]);
+        sensor_msgs::PointCloud2ConstIterator<ScalarType> iterX(rosMsg, fieldNames[0]);
+        sensor_msgs::PointCloud2ConstIterator<ScalarType> iterY(rosMsg, fieldNames[1]);
 
         // Dispatch a deserialization routine based on dimensions.
         if (is3dPointCloud)
         {
-            sensor_msgs::PointCloud2ConstIterator<T> iterZ(rosMsg, fieldNames[2]);
+            sensor_msgs::PointCloud2ConstIterator<ScalarType> iterZ(rosMsg, fieldNames[2]);
             for (size_t i = 0; i < pointCount; ++i, ++iterX, ++iterY, ++iterZ)
             {
                 view(0, i) = *iterX;
