@@ -240,6 +240,36 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsColor)
     // EXPECT_TRUE(deserializedPointCloud.getDescriptorViewByName("color").isApprox(pointCloud.getDescriptorViewByName("color")));
 }
 
+TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsColorWithTransparency)
+{
+    PointCloudMsgGenerationParameters parameters;
+    parameters.nbPoints_ = 15;
+    parameters.dimColor_ = 4;
+    parameters.hasColorRgba_ = true;
+
+    // Compute dimension of descriptors.
+    const size_t dimDescriptors = (parameters.dimNormals_ + parameters.dimColor_ + parameters.dimScalar_);
+
+    // Create point cloud.
+    const DataPoints pointCloud = generatePointCloud(parameters);
+    const sensor_msgs::PointCloud2 rosMsg =
+        pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
+
+    // Deserialize msg.
+    const DataPoints deserializedPointCloud = RosPointCloud2Deserializer<ScalarType>::deserialize(rosMsg);
+
+    // Assertions.
+    EXPECT_EQ(deserializedPointCloud.getNbPoints(), parameters.nbPoints_);
+    EXPECT_EQ(deserializedPointCloud.getEuclideanDim(), parameters.dimFeatures_ - 1);
+    EXPECT_EQ(deserializedPointCloud.getHomogeneousDim(), parameters.dimFeatures_);
+    EXPECT_EQ(deserializedPointCloud.getNbGroupedDescriptors(), 1u);
+    EXPECT_EQ(deserializedPointCloud.getDescriptorDim(), dimDescriptors);
+    EXPECT_EQ(deserializedPointCloud.getTimeDim(), parameters.dimTime_);
+    // TODO(ynava) Numerical accuracy of color type conversion makes it difficult to test for equality.
+    // Improve deserialization and serialization to decrease inaccuracy.
+    // EXPECT_TRUE(deserializedPointCloud.getDescriptorViewByName("color").isApprox(pointCloud.getDescriptorViewByName("color")));
+}
+
 TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsScalar)
 {
     PointCloudMsgGenerationParameters parameters;
