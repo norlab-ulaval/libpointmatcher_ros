@@ -21,7 +21,7 @@
 namespace PointMatcher_ROS
 {
 
-template<typename T>
+template<typename ScalarType>
 class RosPointCloud2Deserializer
 {
 public:
