@@ -19,7 +19,7 @@ namespace PointMatcher_ROS
 	
 	template<typename T>
 	nav_msgs::Odometry pointMatcherTransformationToOdomMsg(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id,
-														   const ros::Time& stamp);
+														   const std::string& child_frame_id, const ros::Time& stamp);
 	
 	template<typename T>
 	typename PointMatcher<T>::TransformationParameters rosTfToPointMatcherTransformation(const geometry_msgs::TransformStamped& transformStamped,

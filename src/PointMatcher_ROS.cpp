@@ -6,7 +6,7 @@
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::PointCloud2& rosMsg)
 {
-	typedef PointMatcher<T> PM;
+	typedef PointMatcher <T> PM;
 	typedef typename PointMatcherIO<T>::PMPropTypes PM_types;
 	typedef typename PM::DataPoints DataPoints;
 	typedef typename DataPoints::Label Label;
@@ -18,7 +18,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 	Labels descLabels;
 	Labels timeLabels;
 	std::vector<bool> isFeature;
-	std::vector<PM_types> fieldTypes;
+	std::vector <PM_types> fieldTypes;
 	for(auto it(rosMsg.fields.begin()); it != rosMsg.fields.end(); ++it)
 	{
 		const std::string name(it->name);
@@ -256,7 +256,7 @@ PointMatcher<double>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<dou
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::LaserScan& rosMsg)
 {
-	typedef PointMatcher<T> PM;
+	typedef PointMatcher <T> PM;
 	typedef typename PM::DataPoints DataPoints;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
@@ -276,7 +276,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 	}
 	
 	// filter points based on range
-	std::vector<size_t> ids(rosMsg.ranges.size());
+	std::vector <size_t> ids(rosMsg.ranges.size());
 	std::vector<double> ranges(rosMsg.ranges.size());
 	std::vector<double> intensities(rosMsg.intensities.size());
 	
@@ -588,11 +588,13 @@ sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg<double>(con
 
 template<typename T>
 nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg(const typename PointMatcher<T>::TransformationParameters& inTr,
-																		 const std::string& frame_id, const ros::Time& stamp)
+																		 const std::string& frame_id, const std::string& child_frame_id,
+																		 const ros::Time& stamp)
 {
 	nav_msgs::Odometry odom;
 	odom.header.stamp = stamp;
 	odom.header.frame_id = frame_id;
+	odom.child_frame_id = child_frame_id;
 	
 	// Fill pose
 	const Eigen::Affine3d eigenTr(
@@ -617,11 +619,13 @@ nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg(const t
 
 template
 nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg<float>(const PointMatcher<float>::TransformationParameters& inTr,
-																				const std::string& frame_id, const ros::Time& stamp);
+																				const std::string& frame_id, const std::string& child_frame_id,
+																				const ros::Time& stamp);
 
 template
 nav_msgs::Odometry PointMatcher_ROS::pointMatcherTransformationToOdomMsg<double>(const PointMatcher<double>::TransformationParameters& inTr,
-																				 const std::string& frame_id, const ros::Time& stamp);
+																				 const std::string& frame_id, const std::string& child_frame_id,
+																				 const ros::Time& stamp);
 
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher_ROS::rosTfToPointMatcherTransformation(const geometry_msgs::TransformStamped& transformStamped,
