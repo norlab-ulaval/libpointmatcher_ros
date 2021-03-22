@@ -365,34 +365,36 @@ sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const typen
 	
 	// features
 	unsigned offset(0);
-	assert(!pmCloud.featureLabels.empty());
-	assert(pmCloud.featureLabels[pmCloud.featureLabels.size() - 1].text == "pad");
-	for(auto it(pmCloud.featureLabels.begin()); it != pmCloud.featureLabels.end(); ++it)
-	{
-		// last label is padding
-		if((it + 1) == pmCloud.featureLabels.end())
-		{
-			break;
-		}
-		PF pointField;
-		pointField.name = it->text;
-		pointField.offset = offset;
-		pointField.datatype = dataType;
-		pointField.count = it->span;
-		rosCloud.fields.push_back(pointField);
-		offset += it->span * scalarSize;
-	}
 	bool addZ(false);
-	if(!pmCloud.featureLabels.contains("z"))
+	if(pmCloud.featureLabels.size() > 0)
 	{
-		PF pointField;
-		pointField.name = "z";
-		pointField.offset = offset;
-		pointField.datatype = dataType;
-		pointField.count = 1;
-		rosCloud.fields.push_back(pointField);
-		offset += scalarSize;
-		addZ = true;
+		assert(pmCloud.featureLabels[pmCloud.featureLabels.size() - 1].text == "pad");
+		for(auto it(pmCloud.featureLabels.begin()); it != pmCloud.featureLabels.end(); ++it)
+		{
+			// last label is padding
+			if((it + 1) == pmCloud.featureLabels.end())
+			{
+				break;
+			}
+			PF pointField;
+			pointField.name = it->text;
+			pointField.offset = offset;
+			pointField.datatype = dataType;
+			pointField.count = it->span;
+			rosCloud.fields.push_back(pointField);
+			offset += it->span * scalarSize;
+		}
+		if(!pmCloud.featureLabels.contains("z"))
+		{
+			PF pointField;
+			pointField.name = "z";
+			pointField.offset = offset;
+			pointField.datatype = dataType;
+			pointField.count = 1;
+			rosCloud.fields.push_back(pointField);
+			offset += scalarSize;
+			addZ = true;
+		}
 	}
 	
 	// descriptors
