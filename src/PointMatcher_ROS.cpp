@@ -130,7 +130,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 				}
 			}
 		}
-		else if(ends_with(it->name, "_splitTime_high32") || ends_with(it->name, "_splitTime_low32"))
+		else if(ends_with(it->name, "_splitTime_high32") || ends_with(it->name, "_splitTime_low32") || it->name == "time")
 		{
 			std::string startingName = it->name;
 			bool isHigh = false;
