@@ -73,6 +73,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 		{
 			timeLabels.push_back(Label(name, count));
 			isFeature.push_back(false);
+			fieldTypes.push_back(PM_types::TIME);
 		}
 		else
 		{
