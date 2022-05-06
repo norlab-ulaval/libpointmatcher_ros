@@ -402,6 +402,8 @@ sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const typen
 	bool hasColor(false);
 	unsigned colorPos(0);
 	unsigned colorCount(0);
+	bool hasRing(false);
+	unsigned ringPos(0);
 	unsigned inDescriptorPos(0);
 	for(auto it(pmCloud.descriptorLabels.begin()); it != pmCloud.descriptorLabels.end(); ++it)
 	{
@@ -440,6 +442,17 @@ sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const typen
 			pointField.count = 1;
 			rosCloud.fields.push_back(pointField);
 			offset += 4;
+		}
+		else if(it->text == "ring")
+		{
+			ringPos = inDescriptorPos;
+			hasRing = true;
+			pointField.datatype = PF::UINT16;
+			pointField.name = "ring";
+			pointField.offset = offset;
+			pointField.count = 1;
+			rosCloud.fields.push_back(pointField);
+			offset += 2;
 		}
 		else
 		{
@@ -506,8 +519,11 @@ sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const typen
 	
 	assert(descriptorDim == inDescriptorPos);
 	const unsigned postColorPos(colorPos + colorCount);
-	assert(postColorPos <= inDescriptorPos);
 	const unsigned postColorCount(descriptorDim - postColorPos);
+	assert(postColorPos <= inDescriptorPos);
+	const unsigned postRingPos(ringPos + 1);
+	const unsigned postRingCount(descriptorDim - postRingPos);
+	assert(postRingPos <= inDescriptorPos);
 	
 	for(unsigned pt(0); pt < rosCloud.width; ++pt)
 	{
@@ -543,6 +559,19 @@ sensor_msgs::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const typen
 				// after color
 				memcpy(fPtr, reinterpret_cast<const uint8_t*>(&pmCloud.descriptors(postColorPos, pt)), scalarSize * postColorCount);
 				fPtr += scalarSize * postColorCount;
+			}
+			else if(hasRing)
+			{
+				// before ring
+				memcpy(fPtr, reinterpret_cast<const uint8_t*>(&pmCloud.descriptors(0, pt)), scalarSize * ringPos);
+				fPtr += scalarSize * ringPos;
+				// ring
+				uint16_t ring = pmCloud.descriptors(ringPos, pt);
+				memcpy(fPtr, reinterpret_cast<const uint8_t*>(&ring), 2);
+				fPtr += 2;
+				// after ring
+				memcpy(fPtr, reinterpret_cast<const uint8_t*>(&pmCloud.descriptors(postRingPos, pt)), scalarSize * postRingCount);
+				fPtr += scalarSize * postRingCount;
 			}
 			else
 			{
