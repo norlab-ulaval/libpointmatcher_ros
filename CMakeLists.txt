@@ -31,9 +31,18 @@ target_link_libraries(pointmatcher_ros
     ${libpointmatcher_LIBRARIES}
 )
 
-install(TARGETS
-    pointmatcher_ros
-    DESTINATION lib/${PROJECT_NAME}
+install(DIRECTORY include
+    DESTINATION include/${PROJECT_NAME}
 )
+install(TARGETS pointmatcher_ros
+    EXPORT export_pointmatcher_ros
+    RUNTIME DESTINATION bin
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+)
+
+ament_export_include_directories("include/${PROJECT_NAME}/include")
+ament_export_libraries(pointmatcher_ros)
+ament_export_dependencies(rclcpp sensor_msgs nav_msgs tf2_eigen)
 
 ament_package()
