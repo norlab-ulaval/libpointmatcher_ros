@@ -29,4 +29,7 @@ namespace PointMatcher_ROS
 	template<typename T>
 	geometry_msgs::msg::TransformStamped pointMatcherTransformationToRosTf(const typename PointMatcher<T>::TransformationParameters& inTr,
 																	  const std::string& frame_id, const std::string& child_frame_id, const rclcpp::Time& stamp);
+
+    template<typename T>
+    typename PointMatcher<T>::TransformationParameters rosMsgToPointMatcherTransformation(const geometry_msgs::msg::Pose& pose, const int& transformationDimension);
 }

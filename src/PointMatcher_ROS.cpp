@@ -674,3 +674,35 @@ template
 geometry_msgs::msg::TransformStamped PointMatcher_ROS::pointMatcherTransformationToRosTf<double>(const PointMatcher<double>::TransformationParameters& inTr,
 																							const std::string& frame_id,
 																							const std::string& child_frame_id, const rclcpp::Time& stamp);
+
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher_ROS::rosMsgToPointMatcherTransformation(const geometry_msgs::msg::Pose& pose, const int& transformationDimension)
+{
+    typedef PointMatcher <T> PM;
+
+    Eigen::Matrix<T, 3, 1> epsilon(pose.orientation.x, pose.orientation.y, pose.orientation.z);
+    T eta = pose.orientation.w;
+    typename PM::Matrix skewSymmetricEpsilon = PM::Matrix::Zero(3, 3);
+    skewSymmetricEpsilon << 0, -epsilon[2], epsilon[1],
+            epsilon[2], 0, -epsilon[0],
+            -epsilon[1], epsilon[0], 0;
+    typename PM::Matrix rotationMatrix = (((eta * eta) - epsilon.dot(epsilon)) * PM::Matrix::Identity(3, 3)) +
+                                         (2 * eta * skewSymmetricEpsilon) + (2 * epsilon * epsilon.transpose());
+
+    Eigen::Matrix<T, 3, 1> positionVector(pose.position.x, pose.position.y, pose.position.z);
+
+    typename PM::TransformationParameters transformationParameters = PM::TransformationParameters::Identity(transformationDimension, transformationDimension);
+    transformationParameters.topLeftCorner(transformationDimension - 1, transformationDimension - 1) = rotationMatrix.topLeftCorner(transformationDimension - 1,
+                                                                                                                                    transformationDimension -
+                                                                                                                                    1);
+    transformationParameters.topRightCorner(transformationDimension - 1, 1) = positionVector.head(transformationDimension - 1);
+    return transformationParameters;
+}
+
+template
+PointMatcher<float>::TransformationParameters PointMatcher_ROS::rosMsgToPointMatcherTransformation<float>(const geometry_msgs::msg::Pose& pose,
+                                                                                                          const int& transformationDimension);
+
+template
+PointMatcher<double>::TransformationParameters PointMatcher_ROS::rosMsgToPointMatcherTransformation<double>(const geometry_msgs::msg::Pose& pose,
+                                                                                                            const int& transformationDimension);
