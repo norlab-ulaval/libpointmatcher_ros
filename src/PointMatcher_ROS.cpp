@@ -1,6 +1,6 @@
 #include "pointmatcher_ros/PointMatcher_ROS.h"
 #include "utils.h"
-#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_eigen/tf2_eigen.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
 template<typename T>
