@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   nav_msgs
+  tf2_eigen
   )
 
 find_package(libpointmatcher CONFIG)
