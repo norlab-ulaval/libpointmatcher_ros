@@ -69,7 +69,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 			fieldTypes.push_back(PM_types::TIME);
 			fieldTypes.push_back(PM_types::TIME);
 		}
-		else if(name == "time")
+		else if(name == "time" || name == "t")
 		{
 			timeLabels.push_back(Label(name, count));
 			isFeature.push_back(false);
@@ -131,7 +131,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 				}
 			}
 		}
-		else if(ends_with(it->name, "_splitTime_high32") || ends_with(it->name, "_splitTime_low32") || it->name == "time")
+		else if(ends_with(it->name, "_splitTime_high32") || ends_with(it->name, "_splitTime_low32") || it->name == "time" || it->name == "t")
 		{
 			std::string startingName = it->name;
 			bool isHigh = false;
@@ -488,6 +488,16 @@ sensor_msgs::msg::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const 
 			rosCloud.fields.push_back(pointField);
 			offset += timeSize;
 		}
+        else if(it->text == "t")
+        {
+            hasTime = true;
+            pointField.datatype = PF::UINT32;
+            pointField.name = it->text;
+            pointField.offset = offset;
+            pointField.count = 1;
+            rosCloud.fields.push_back(pointField);
+            offset += timeSize;
+        }
 	}
 
 	// fill cloud with data
@@ -556,21 +566,9 @@ sensor_msgs::msg::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const 
 		{
 			const size_t ptrSize = timeSize * timeDim;
 
-			// Elapsed time
-			const float elapsedTime = (float)(pmCloud.times(0, pt) - pmCloud.times(0, 0)) * 1e-9f;
-			memcpy(fPtr, reinterpret_cast<const uint8_t*>(&elapsedTime), ptrSize);
-			fPtr += ptrSize;
-
-			// high32
-			const uint32_t high32 = (uint32_t)(pmCloud.times(0, pt) >> 32);
-			memcpy(fPtr, reinterpret_cast<const uint8_t*>(&high32), ptrSize);
-			fPtr += ptrSize;
-
-			// low32
-			const uint32_t low32 = (uint32_t)(pmCloud.times(0, pt));
-			memcpy(fPtr, reinterpret_cast<const uint8_t*>(&low32), ptrSize);
-			fPtr += ptrSize;
-
+            const std::uint32_t t = pmCloud.times(0, pt);
+            memcpy(fPtr, reinterpret_cast<const uint8_t*>(&t), ptrSize);
+            fPtr += ptrSize;
 		}
 	}
 
