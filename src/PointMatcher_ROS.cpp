@@ -56,22 +56,30 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 			isFeature.push_back(false);
 			fieldTypes.push_back(PM_types::DESCRIPTOR);
 		}
-		else if((it + 1) != rosMsg.fields.end() && ends_with(name, "_splitTime_high32") && ends_with(((it + 1)->name), "_splitTime_low32"))
+		else if ((it + 1) != rosMsg.fields.end() && ends_with(name, "_splitTime_high32") && ends_with(((it + 1)->name), "_splitTime_low32"))
 		{
-			// time extraction
-			std::string startingName = name;
-			erase_last(startingName, "_splitTime_high32");
-			const std::string beginning = startingName;
-
-			timeLabels.push_back(Label(beginning, 1));
+			// legacy time extraction
 			it += 1;
+			timeLabels.push_back(Label("time", 1)); // libpointmatcher Time field name is "time"
+			isFeature.push_back(false);
 			isFeature.push_back(false);
 			fieldTypes.push_back(PM_types::TIME);
 			fieldTypes.push_back(PM_types::TIME);
 		}
-		else if(name == "time")
+		// Process time information
+		else if (name == "time" || name == "t" || name == "timestamp")
 		{
-			timeLabels.push_back(Label(name, count));
+			switch (it->datatype)
+			{
+			case 6:
+			case 7:
+			case 8:
+				break;
+			default:
+				throw std::runtime_error("Unknown time field type. Field name: " + name + " datatype: " + std::to_string(unsigned(it->datatype)));
+			}
+
+			timeLabels.push_back(Label("time", count)); // libpointmatcher Time field name is "time"
 			isFeature.push_back(false);
 			fieldTypes.push_back(PM_types::TIME);
 		}
@@ -131,35 +139,25 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 				}
 			}
 		}
-		else if(ends_with(it->name, "_splitTime_high32") || ends_with(it->name, "_splitTime_low32") || it->name == "time")
+		// legacy libpointmatcher time fields
+		else if (ends_with(it->name, "_splitTime_high32") || ends_with(it->name, "_splitTime_low32"))
 		{
-			std::string startingName = it->name;
-			bool isHigh = false;
-			if(ends_with(it->name, "_splitTime_high32"))
-			{
-				erase_last(startingName, "_splitTime_high32");
-				isHigh = true;
-			}
-			if(ends_with(it->name, "_splitTime_low32"))
-			{
-				erase_last(startingName, "_splitTime_low32");
-			}
-
-			TimeView timeView(cloud.getTimeViewByName(startingName));
+			bool isHigh = ends_with(it->name, "_splitTime_high32");
+			TimeView timeView(cloud.getTimeViewByName("time"));
 
 			int ptId(0);
 			const size_t count(std::max<size_t>(it->count, 1));
-			for(size_t y(0); y < rosMsg.height; ++y)
+			for (size_t y(0); y < rosMsg.height; ++y)
 			{
-				const uint8_t* dataPtr(&rosMsg.data[0] + rosMsg.row_step * y);
-				for(size_t x(0); x < rosMsg.width; ++x)
+				const uint8_t *dataPtr(&rosMsg.data[0] + rosMsg.row_step * y);
+				for (size_t x(0); x < rosMsg.width; ++x)
 				{
-					const uint8_t* fPtr(dataPtr + it->offset);
-					for(unsigned dim(0); dim < count; ++dim)
+					const uint8_t *fPtr(dataPtr + it->offset);
+					for (unsigned dim(0); dim < count; ++dim)
 					{
-						if(isHigh)
+						if (isHigh)
 						{
-							const uint32_t high32 = *reinterpret_cast<const uint32_t*>(fPtr);
+							const uint32_t high32 = *reinterpret_cast<const uint32_t *>(fPtr);
 							const uint32_t low32 = uint32_t(timeView(dim, ptId));
 							timeView(dim, ptId) = (((uint64_t)high32) << 32) | ((uint64_t)low32);
 						}
@@ -175,11 +173,69 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 					}
 				}
 			}
-
+		}
+		else if (it->name == "time" || it->name == "t" || it->name == "timestamp")
+		{
+			int pointIdx;
+			TimeView timeView(cloud.getTimeViewByName("time"));
+			switch (it->datatype)
+			{
+			case 6:
+			{
+				pointIdx = 0;
+				int64_t scanTime = 1e9 * rosMsg.header.stamp.sec + rosMsg.header.stamp.nanosec;
+				for (size_t y(0); y < rosMsg.height; ++y)
+				{
+					const uint8_t *dataPtr(&rosMsg.data[0] + rosMsg.row_step * y);
+					for (size_t x(0); x < rosMsg.width; ++x)
+					{
+						const uint32_t time(*reinterpret_cast<const uint32_t *>(dataPtr + it->offset)); // Ouster timestamp is 4 bytes
+						timeView(0, pointIdx) = scanTime + (int64_t)time;							   // Lpm timestamp is 8 bytes
+						dataPtr += rosMsg.point_step;
+						pointIdx += 1;
+					}
+				}
+				break;
+			}
+			case 7:
+			{
+				pointIdx = 0;
+				int64_t scanTime = 1e9 * rosMsg.header.stamp.sec + rosMsg.header.stamp.nanosec;
+				for (size_t y(0); y < rosMsg.height; ++y)
+				{
+					const uint8_t *dataPtr(&rosMsg.data[0] + rosMsg.row_step * y);
+					for (size_t x(0); x < rosMsg.width; ++x)
+					{
+						const float time(*reinterpret_cast<const float *>(dataPtr + it->offset)); // Velodyne timestamp is 4 bytes
+						timeView(0, pointIdx) = scanTime + (int64_t)(time * 1e9);				 // Convert to nanoseconds
+						dataPtr += rosMsg.point_step;
+						pointIdx += 1;
+					}
+				}
+				break;
+			}
+			case 8:
+			{
+				pointIdx = 0;
+				for (size_t y(0); y < rosMsg.height; ++y)
+				{
+					const uint8_t *dataPtr(&rosMsg.data[0] + rosMsg.row_step * y);
+					for (size_t x(0); x < rosMsg.width; ++x)
+					{
+						const double time(*reinterpret_cast<const double *>(dataPtr + it->offset)); // Hesai timestamp is FLOAT64 = 8 bytes
+						timeView(0, pointIdx) = (int64_t)(time * 1e9);							  // Convert to nanoseconds
+						dataPtr += rosMsg.point_step;
+						pointIdx += 1;
+					}
+				}
+				break;
+			}
+			default:
+				throw std::runtime_error("Unknown time field type. Field name: " + it->name + " datatype: " + std::to_string(unsigned(it->datatype)));
+			}
 		}
 		else
 		{
-
 			// get view for editing data
 			View view(
 					(it->name == "normal_x") ? cloud.getDescriptorRowViewByName("normals", 0) :
@@ -326,6 +382,8 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 			is(0, i) = intensities[i];
 		}
 	}
+
+	// TODO add support for time fields
 
 	return cloud;
 }
