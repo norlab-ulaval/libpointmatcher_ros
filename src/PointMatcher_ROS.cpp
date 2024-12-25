@@ -206,8 +206,9 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 					const uint8_t *dataPtr(&rosMsg.data[0] + rosMsg.row_step * y);
 					for (size_t x(0); x < rosMsg.width; ++x)
 					{
-						const float time(*reinterpret_cast<const float *>(dataPtr + it->offset)); // Velodyne timestamp is 4 bytes
-						timeView(0, pointIdx) = scanTime + (int64_t)(time * 1e9);				 // Convert to nanoseconds
+						const float time(*reinterpret_cast<const float *>(dataPtr + it->offset)); // Leishen timestamp is 4 bytes
+						// Convert to nanoseconds and subtract from scan time, which refers to the scan end.
+						timeView(0, pointIdx) = scanTime - (int64_t)(time * 1e9);
 						dataPtr += rosMsg.point_step;
 						pointIdx += 1;
 					}
@@ -300,7 +301,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 			}
 		}
 	}
-	
+
 	return cloud;
 }
 
