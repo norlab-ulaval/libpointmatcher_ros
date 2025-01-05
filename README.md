@@ -1,10 +1,11 @@
 # libpointmatcher_ros
+
 A bridge between libpointmatcher and ROS, converts between [ROS point cloud messages](https://docs.ros.org/en/jade/api/sensor_msgs/html/msg/PointCloud2.html) and libpointmatcher `DataPoints` objects.
 While the conversion of most datafields is straightforward, the per-point time field if more complicated due to different manufactures/driver authors represent timestamp messages.
 In this driver, we distinguish between three types of timestamps:
 
 | Name         | Tested on                     | Datatype | ROS PointField | Stamped with |
-|--------------|-------------------------------|----------|----------------|--------------|
+| ------------ | ----------------------------- | -------- | -------------- | ------------ |
 | Ouster-like  | RS-32                         | uint32   | 6              | beginning    |
 | Leishen-like | LS L128 S1                    | float32  | 7              | end          |
 | Hesai-like   | RS Ruby Plus, Hesai Pandar XT | float64  | 8              | beginning    |
@@ -20,20 +21,24 @@ When converting back from ROS messages to `DataPoints`, the low and high fields 
 Below you can find a brief explication how the different timestamp types are treated when converted to `DataPoints` objects.
 
 ### Ouster-like
+
 For Ouster-like timestamps, the timestamp is stored in the `uint32` field `t` in the ROS message.
 The values represent the number of nanoseconds since the beginning of the scan, which is given in the `header.stamp` field.
 To get a per-point timestamp, one has to add the per-point `t` value to the value obtained from the `header.stamp` field.
 
 ### Leishen-like
+
 For Leishen-like timestamps, the timestamp is stored in the `float` field `time` in the ROS message.
 The values represent the number of seconds (typically between 0.0 and 0.1) before the end of the scan, which is given in the `header.stamp` field.
 To get a per-point timestamp, we have to subtract the per-point `time` value from the value obtained from the `header.stamp` field.
 
 ### Hesai-like
-For Hesai-like timestamps, the timestamp is stored in the `double` field `timestamp` in the ROS message.
+
+For Hesai-like timestamps, the timestamp is stored in the `float64` field `timestamp` in the ROS message.
 The values represent the number of seconds in epoch time.
 This is the easest case as the timestamp is already in a 8-byte representation and we just need to multiply the per-point `timestamp` value by 1e9 to obtain nanoseconds and convert it to an `int64` datatype.
 
-----------------
+---
+
 Note that we haven't tested the bridge with different lidars, which might need special treatment due to different timestamp representations.
 To figure out how what exactly your ROS messages represent, you will need to investigate the driver code or the datasheet of the lidar.
