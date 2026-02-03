@@ -4,7 +4,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::msg::PointCloud2& rosMsg)
+typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::msg::PointCloud2& rosMsg, bool isFomo)
 {
 	typedef PointMatcher <T> PM;
 	typedef typename PointMatcherIO<T>::PMPropTypes PM_types;
@@ -69,6 +69,7 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 		// Process time information
 		else if (name == "time" || name == "t" || name == "timestamp")
 		{
+		    std::cout << "Has time field " << name  << " with count " << count << std::endl;
 			switch (it->datatype)
 			{
 			case 6:
@@ -218,13 +219,17 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 			case 8:
 			{
 				pointIdx = 0;
+				double multiplier = 1e9;
+				if (isFomo) // FoMo timestamps are already in microseconds
+					multiplier = 1e3;
+
 				for (size_t y(0); y < rosMsg.height; ++y)
 				{
 					const uint8_t *dataPtr(&rosMsg.data[0] + rosMsg.row_step * y);
 					for (size_t x(0); x < rosMsg.width; ++x)
 					{
 						const double time(*reinterpret_cast<const double *>(dataPtr + it->offset)); // Hesai timestamp is FLOAT64 = 8 bytes
-						timeView(0, pointIdx) = (int64_t)(time * 1e9);							  // Convert to nanoseconds
+						timeView(0, pointIdx) = (int64_t)(time * multiplier);							  // Convert to nanoseconds
 						dataPtr += rosMsg.point_step;
 						pointIdx += 1;
 					}
@@ -306,13 +311,13 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 }
 
 template
-PointMatcher<float>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<float>(const sensor_msgs::msg::PointCloud2& rosMsg);
+PointMatcher<float>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<float>(const sensor_msgs::msg::PointCloud2& rosMsg, bool isFomo);
 
 template
-PointMatcher<double>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<double>(const sensor_msgs::msg::PointCloud2& rosMsg);
+PointMatcher<double>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<double>(const sensor_msgs::msg::PointCloud2& rosMsg, bool isFomo);
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::msg::LaserScan& rosMsg)
+typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud(const sensor_msgs::msg::LaserScan& rosMsg, bool isFomo)
 {
 	typedef PointMatcher <T> PM;
 	typedef typename PM::DataPoints DataPoints;
@@ -390,10 +395,10 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 }
 
 template
-PointMatcher<float>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<float>(const sensor_msgs::msg::LaserScan& rosMsg);
+PointMatcher<float>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<float>(const sensor_msgs::msg::LaserScan& rosMsg, bool isFomo);
 
 template
-PointMatcher<double>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<double>(const sensor_msgs::msg::LaserScan& rosMsg);
+PointMatcher<double>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud<double>(const sensor_msgs::msg::LaserScan& rosMsg, bool isFomo);
 
 template<typename T>
 sensor_msgs::msg::PointCloud2 PointMatcher_ROS::pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,

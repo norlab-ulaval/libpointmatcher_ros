@@ -8,11 +8,12 @@
 
 namespace PointMatcher_ROS
 {
+
 	template<typename T>
-	typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::msg::PointCloud2& rosMsg);
-	
+	typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::msg::PointCloud2& rosMsg, bool isFomo=false);
+
 	template<typename T>
-	typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::msg::LaserScan& rosMsg);
+	typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::msg::LaserScan& rosMsg, bool isFomo=false);
 
 	template<typename T>
 	sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,
