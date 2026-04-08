@@ -69,7 +69,6 @@ typename PointMatcher<T>::DataPoints PointMatcher_ROS::rosMsgToPointMatcherCloud
 		// Process time information
 		else if (name == "time" || name == "t" || name == "timestamp")
 		{
-		    std::cout << "Has time field " << name  << " with count " << count << std::endl;
 			switch (it->datatype)
 			{
 			case 6:
